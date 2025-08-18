@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tasks
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def article_list(request):
     tasks = Tasks.objects.all()
     return render(request, 'gestionneur_task/task_list.html', {'tasks': tasks})
 
+@login_required
 def ajouter_tache(request):
     if request.method == 'POST':
         titre = request.POST.get('titre')
@@ -12,11 +15,13 @@ def ajouter_tache(request):
             Tasks.objects.create(titre=titre)
     return redirect('accueil')
 
+@login_required
 def supprimer_tache(request, tache_id):
     tache = get_object_or_404(Tasks, id=tache_id)
     tache.delete()
     return redirect('accueil')
 
+@login_required
 def modifier_tache(request, tache_id):
     tache = get_object_or_404(Tasks, id=tache_id)
     if request.method == 'POST':
