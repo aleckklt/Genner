@@ -11,8 +11,10 @@ def article_list(request):
 def ajouter_tache(request):
     if request.method == 'POST':
         titre = request.POST.get('titre')
+        date = request.POST.get('date')
+        heure = request.POST.get('heure')
         if titre:
-            Tasks.objects.create(titre=titre)
+            Tasks.objects.create(titre=titre, date=date, heure=heure)
     return redirect('accueil')
 
 @login_required

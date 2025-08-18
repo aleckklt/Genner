@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Mes Tâches</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestionnaire de Tâches</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <style>
         body {
             margin: 0;
@@ -16,55 +17,60 @@
             align-items: center;
             padding: 40px 20px;
         }
-
         h1 {
             margin-bottom: 30px;
             color: white;
             text-shadow: 1px 1px 2px #000;
         }
-
         .task-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             background: white;
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
-
-        .task-input input {
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
         }
-
-        .task-input button {
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
+        thead th {
+            background-color: #c9d6ff;
+            color: #333;
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: left;
+            border-radius: 10px 10px 0 0;
         }
-
-        .task-item {
-            background: #f5f5f5;
-            margin-bottom: 10px;
-            padding: 15px;
+        tbody tr {
+            background-color: #f0f4ff;
             border-radius: 10px;
         }
-
+        tbody tr td {
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+        tbody tr:hover {
+            background-color: #d7e1ff;
+        }
+        .status-en-cours {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        .status-termine {
+            color: #10b981;
+            font-weight: 600;
+        }
+        .actions a {
+            margin-right: 10px;
+        }
         @media (max-width: 576px) {
-            .task-input {
-                flex-direction: column !important;
+            .task-container {
+                padding: 20px;
             }
-
-            .task-input input,
-            .task-input button {
-                border-radius: 10px !important;
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .task-actions {
-                flex-direction: row !important;
-                justify-content: flex-end;
-                gap: 10px;
+            thead th, tbody tr td {
+                padding: 10px 8px;
             }
         }
     </style>
@@ -72,32 +78,77 @@
 <body>
     <h1>Gestionnaire de Tâches</h1>
     <div class="task-container">
-        <form method="POST" action="{% url 'ajouter_tache' %}" class="d-flex task-input mb-4">
-            {% csrf_token %}
-            <input type="text" name="titre" class="form-control" placeholder="Ajouter une nouvelle tâche..." required>
-            <button type="submit" class="btn btn-primary">
+        <div class="d-flex justify-content-end mb-4">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterTacheModal" aria-label="Ajouter tâche">
                 <i class="bi bi-plus-lg"></i>
             </button>
-        </form>
-
-        <ul class="list-unstyled">
-            {% for task in tasks %}
-                <li class="task-item d-flex justify-content-between align-items-center">
-                    <span>{{ task.titre }}</span>
-                    <div class="task-actions d-flex gap-2">
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.titre }}</td>
+                    <td>
+                        {% if task.termine %}
+                            <span class="status-termine">Terminé</span>
+                        {% else %}
+                            <span class="status-en-cours">En cours</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
                         <a href="{% url 'modifier_tache' task.id %}" class="btn btn-sm btn-success" title="Modifier">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="{% url 'supprimer_tache' task.id %}" class="btn btn-sm btn-danger" title="Supprimer"
-                           onclick="return confirm('Supprimer cette tâche ?');">
+                        <a href="{% url 'supprimer_tache' task.id %}" class="btn btn-sm btn-danger" title="Supprimer" onclick="return confirm('Supprimer cette tâche ?');">
                             <i class="bi bi-trash"></i>
                         </a>
-                    </div>
-                </li>
-            {% empty %}
-                <li class="text-center text-muted py-3">Aucune tâche pour le moment.</li>
-            {% endfor %}
-        </ul>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-3">Aucune tâche pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     </div>
+    <div class="modal fade" id="ajouterTacheModal" tabindex="-1" aria-labelledby="ajouterTacheLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{% url 'ajouter_tache' %}" class="modal-content">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ajouterTacheLabel">Ajouter une nouvelle tâche</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="titre" class="form-label">Titre</label>
+                        <input type="text" class="form-control" id="titre" name="titre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date">
+                    </div>
+                    <div class="mb-3">
+                        <label for="heure" class="form-label">Heure</label>
+                        <input type="time" class="form-control" id="heure" name="heure">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
