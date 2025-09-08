@@ -10,6 +10,7 @@ class Tasks(models.Model):
     statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='en_cours')
     date = models.DateField(default=timezone.now)
     heure = models.TimeField(default=timezone.now)
+    commentaire = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.titre
