@@ -50,9 +50,12 @@
 <body>
     <h1>Gestionnaire de Tâches</h1>
 
-    <div class="currency-container">
+    <div class="currency-container d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#currencyConverterModal">
             <i class="bi bi-currency-exchange"></i> Convertisseur de Monnaie
+        </button>
+        <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#exchangeRatesModal">
+            <i class="bi bi-table"></i>
         </button>
     </div>
 
@@ -82,10 +85,10 @@
                         {% endif %}
                     </td>
                     <td class="actions">
-                        <a href="{% url 'modifier_tache' task.id %}" class="btn btn-sm btn-success" title="Modifier la tâche">
+                        <a href="{% url 'modifier_tache' task.id %}" class="btn btn-sm btn-success">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="{% url 'supprimer_tache' task.id %}" class="btn btn-sm btn-danger" title="Supprimer la tâche" onclick="return confirm('Supprimer cette tâche ?');">
+                        <a href="{% url 'supprimer_tache' task.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette tâche ?');">
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
@@ -170,6 +173,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="exchangeRatesModal" tabindex="-1" aria-labelledby="exchangeRatesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exchangeRatesModalLabel">Taux de Change Actuels</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped" id="exchangeRatesTable">
+                        <thead>
+                            <tr>
+                                <th>Devise</th>
+                                <th>Valeur (par rapport à l'USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -184,7 +209,6 @@
                 const amount = parseFloat(amountInput.value);
                 const fromCurrency = fromCurrencySelect.value;
                 const toCurrency = toCurrencySelect.value;
-
                 if (isNaN(amount) || amount <= 0) {
                     conversionResult.innerHTML = 'Veuillez entrer un montant valide.';
                     return;
@@ -197,7 +221,20 @@
                     conversionResult.innerHTML = 'Erreur dans la conversion. Vérifiez les devises.';
                 }
             });
-            
+
+            function updateExchangeRatesTable() {
+                const tbody = document.querySelector('#exchangeRatesTable tbody');
+                tbody.innerHTML = '';
+                for (const [currency, value] of Object.entries(exchangeRates)) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${currency}</td><td>${value.toFixed(4)}</td>`;
+                    tbody.appendChild(row);
+                }
+            }
+
+            updateExchangeRatesTable();
+            setInterval(updateExchangeRatesTable, 60000);
+
             setInterval(function () {
                 const now = new Date();
                 const nowDate = now.toISOString().split('T')[0];
