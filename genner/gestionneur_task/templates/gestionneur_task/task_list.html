@@ -72,7 +72,7 @@
             </thead>
             <tbody>
                 {% for task in tasks %}
-                <tr data-task-date="{{ task.date }}" data-task-heure="{{ task.heure }}" data-task-titre="{{ task.titre }}">
+                <tr data-task-date="{{ task.date|date:'Y-m-d' }}" data-task-heure="{{ task.heure }}" data-task-titre="{{ task.titre }}">
                     <td>{{ task.titre }}</td>
                     <td>
                         {% if task.statut == 'termine' %}
@@ -197,11 +197,7 @@
                     conversionResult.innerHTML = 'Erreur dans la conversion. Vérifiez les devises.';
                 }
             });
-
-            if ('Notification' in window && Notification.permission !== 'granted') {
-                Notification.requestPermission();
-            }
-
+            
             setInterval(function () {
                 const now = new Date();
                 const nowDate = now.toISOString().split('T')[0];
