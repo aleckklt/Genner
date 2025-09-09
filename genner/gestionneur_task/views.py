@@ -4,6 +4,23 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Tasks
 from .forms import TaskForm
+from django.contrib.auth import logout
+
+@login_required
+def ajouter_tache(request):
+    if request.method == 'POST':
+        titre = request.POST.get('titre')
+        date = request.POST.get('date') or None
+        heure = request.POST.get('heure') or None
+
+        if titre:
+            Tasks.objects.create(titre=titre, date=date, heure=heure)
+        return redirect('task_list')
+
+@login_required
+def deconnexion(request):
+    logout(request)
+    return redirect('login')
 
 def get_exchange_rates():
     api_key = os.getenv('API_KEY')
@@ -31,16 +48,6 @@ def task_list(request):
 def convert_device(request):
     exchange_rates = get_exchange_rates()
     return render(request, 'convert_device.html', {'exchange_rates': exchange_rates})
-
-@login_required
-def ajouter_tache(request):
-    if request.method == 'POST':
-        titre = request.POST.get('titre')
-        date = request.POST.get('date')
-        heure = request.POST.get('heure')
-        if titre:
-            Tasks.objects.create(titre=titre, date=date, heure=heure)
-    return redirect('task_list')
 
 @login_required
 def supprimer_tache(request, tache_id):
