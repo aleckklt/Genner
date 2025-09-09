@@ -19,25 +19,18 @@ def get_exchange_rates():
     return {}
 
 @login_required
-def article_list(request):
+def accueil(request):
+    return render(request, 'accueil.html')
+
+@login_required
+def task_list(request):
     tasks = Tasks.objects.all()
-    tasks_data = [
-        {
-            'id': t.id,
-            'titre': t.titre,
-            'statut': t.statut,
-            'date': t.date.strftime('%Y-%m-%d') if t.date else '',
-            'heure': t.heure.strftime('%H:%M') if t.heure else '',
-        }
-        for t in tasks
-    ]
+    return render(request, 'task_list.html', {'tasks': tasks})
+
+@login_required
+def convert_device(request):
     exchange_rates = get_exchange_rates()
-    exchange_rates_json = json.dumps(exchange_rates)
-    return render(request, 'gestionneur_task/task_list.html', {
-        'tasks': tasks,
-        'tasks_data': tasks_data,
-        'exchange_rates': exchange_rates_json,
-    })
+    return render(request, 'convert_device.html', {'exchange_rates': exchange_rates})
 
 @login_required
 def ajouter_tache(request):
@@ -47,13 +40,13 @@ def ajouter_tache(request):
         heure = request.POST.get('heure')
         if titre:
             Tasks.objects.create(titre=titre, date=date, heure=heure)
-    return redirect('accueil')
+    return redirect('task_list')
 
 @login_required
 def supprimer_tache(request, tache_id):
     tache = get_object_or_404(Tasks, id=tache_id)
     tache.delete()
-    return redirect('accueil')
+    return redirect('task_list')
 
 @login_required
 def modifier_tache(request, tache_id):
@@ -62,10 +55,7 @@ def modifier_tache(request, tache_id):
         form = TaskForm(request.POST, instance=tache)
         if form.is_valid():
             form.save()
-            return redirect('accueil')
+            return redirect('task_list')
     else:
         form = TaskForm(instance=tache)
-    return render(request, 'gestionneur_task/task_update.html', {
-        'form': form,
-        'tache': tache
-    })
+    return render(request, 'task_update.html', {'form': form, 'tache': tache})

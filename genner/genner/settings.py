@@ -56,6 +56,7 @@ MIDDLEWARE = [
 ]
 
 LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = 'accueil'
 ROOT_URLCONF = 'genner.urls'
 
 TEMPLATES = [

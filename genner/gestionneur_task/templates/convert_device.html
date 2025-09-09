@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Convertisseur de Monnaie{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Convertisseur de Monnaie</h2>
+        <a href="{% url 'accueil' %}" class="btn btn-outline-primary">Retour à l'accueil</a>
+    </div>
+
+    <div class="mb-3">
+        <label for="amount" class="form-label">Montant</label>
+        <input type="number" class="form-control" id="amount" min="0" step="any" required />
+    </div>
+    <div class="mb-3">
+        <label for="fromCurrency" class="form-label">Devise d'origine</label>
+        <select id="fromCurrency" class="form-select"></select>
+    </div>
+    <div class="mb-3">
+        <label for="toCurrency" class="form-label">Devise cible</label>
+        <select id="toCurrency" class="form-select"></select>
+    </div>
+
+    <button type="button" class="btn btn-gradient w-100" id="convertBtn">Convertir</button>
+
+    <div class="mt-3">
+        <h5 id="conversionResult">Résultat :</h5>
+    </div>
+
+    <hr class="my-5" />
+
+    <h4>Taux de Change Actuels</h4>
+    <table class="table table-striped" id="exchangeRatesTable">
+        <thead>
+            <tr>
+                <th>Devise</th>
+                <th>Valeur (par rapport à l'USD)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    {# Injecte les données en JSON #}
+    {{ exchange_rates|json_script:"exchangeRatesJson" }}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/convert_device.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Todo List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Liste des Tâches</h1>
+        <a href="{% url 'accueil' %}" class="btn btn-outline-primary">Retour à l'accueil</a>
+    </div>
+    <div class="task-container mt-3">
+        <div class="d-flex justify-content-end mb-4">
+            <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#ajouterTacheModal">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr data-task-date="{{ task.date|date:'Y-m-d' }}" data-task-heure="{{ task.heure }}" data-task-titre="{{ task.titre }}">
+                    <td>{{ task.titre }}</td>
+                    <td>
+                        {% if task.statut == 'termine' %}
+                            <span class="status-termine">Terminé</span>
+                        {% else %}
+                            <span class="status-en-cours">En cours</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'modifier_tache' task.id %}" class="btn btn-sm btn-success"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'supprimer_tache' task.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette tâche ?');"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center text-muted py-3">Aucune tâche pour le moment.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal d'ajout de tâche -->
+    <div class="modal fade" id="ajouterTacheModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form method="POST" action="{% url 'ajouter_tache' %}" class="modal-content">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter une nouvelle tâche</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Titre</label>
+                        <input type="text" name="titre" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" name="date" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Heure</label>
+                        <input type="time" name="heure" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-gradient">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/task_list.js' %}"></script>
+{% endblock %}
