@@ -1,21 +1,45 @@
 import os
 import requests
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from .models import Tasks
 from .forms import TaskForm
-from django.contrib.auth import logout
 
 @login_required
 def ajouter_tache(request):
+    error = None
     if request.method == 'POST':
         titre = request.POST.get('titre')
         date = request.POST.get('date') or None
         heure = request.POST.get('heure') or None
 
         if titre:
-            Tasks.objects.create(titre=titre, date=date, heure=heure)
-        return redirect('task_list')
+            now = datetime.now()
+            if date and heure:
+                try:
+                    dt_str = f"{date} {heure}"
+                    dt_obj = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+                    if dt_obj < now:
+                        error = "La date et l'heure ne peuvent pas être dans le passé."
+                except ValueError:
+                    error = "Date ou heure invalide."
+            elif date:
+                try:
+                    dt_obj = datetime.strptime(date, "%Y-%m-%d")
+                    if dt_obj.date() < now.date():
+                        error = "La date ne peut pas être dans le passé."
+                except ValueError:
+                    error = "Date invalide."
+            elif heure:
+                error = "Veuillez spécifier une date avec l'heure."
+
+            if not error:
+                Tasks.objects.create(titre=titre, date=date, heure=heure)
+                return redirect('task_list')
+
+    return redirect(f"{request.META.get('HTTP_REFERER')}?error={error}" if error else 'task_list')
 
 @login_required
 def deconnexion(request):
@@ -42,7 +66,8 @@ def accueil(request):
 def task_list(request):
     tasks = Tasks.objects.all()
     task_forms = [(task, TaskForm(instance=task)) for task in tasks]
-    return render(request, 'task_list.html', {'task_forms': task_forms})
+    error = request.GET.get("error")
+    return render(request, 'task_list.html', {'task_forms': task_forms, 'error': error})
 
 @login_required
 def convert_device(request):
@@ -61,6 +86,18 @@ def modifier_tache(request, tache_id):
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=tache)
         if form.is_valid():
+            cleaned_date = form.cleaned_data.get('date')
+            cleaned_heure = form.cleaned_data.get('heure')
+            now = datetime.now()
+            if cleaned_date and cleaned_heure:
+                dt_obj = datetime.combine(cleaned_date, cleaned_heure)
+                if dt_obj < now:
+                    return render(request, 'task_update.html', {'form': form, 'tache': tache, 'error': "Date/heure dans le passé."})
+            elif cleaned_date:
+                if cleaned_date < now.date():
+                    return render(request, 'task_update.html', {'form': form, 'tache': tache, 'error': "Date dans le passé."})
+            elif cleaned_heure:
+                return render(request, 'task_update.html', {'form': form, 'tache': tache, 'error': "Veuillez spécifier une date avec l'heure."})
             form.save()
             return redirect('task_list')
     else:

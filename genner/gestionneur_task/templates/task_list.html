@@ -10,6 +10,10 @@
         <a href="{% url 'accueil' %}" class="btn btn-outline-primary">Retour à l'accueil</a>
     </div>
 
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
     <div class="task-container mt-3">
         <div class="d-flex justify-content-end mb-4">
             <button class="btn btn-gradient" data-bs-toggle="modal" data-bs-target="#ajouterTacheModal">
@@ -86,6 +90,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
                     <div class="mb-3">
                         <label class="form-label">Titre</label>
                         <input type="text" name="titre" class="form-control" required />
