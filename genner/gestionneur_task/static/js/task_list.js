@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    setInterval(() => {
+    function checkTasks() {
         const now = new Date();
         const nowDate = now.toISOString().split('T')[0];
         const nowTime = now.toTimeString().slice(0, 5);
@@ -16,5 +16,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-    }, 60000);
+    }
+
+    const now = new Date();
+    const delayToNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+
+    setTimeout(() => {
+        checkTasks();
+        setInterval(checkTasks, 60000);
+    }, delayToNextMinute);
 });
