@@ -102,4 +102,3 @@ def modifier_tache(request, tache_id):
             return redirect('task_list')
     else:
         form = TaskForm(instance=tache)
-    return render(request, 'task_update.html', {'form': form, 'tache': tache})
