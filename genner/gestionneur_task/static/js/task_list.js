@@ -25,4 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
         checkTasks();
         setInterval(checkTasks, 60000);
     }, delayToNextMinute);
+
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
 });

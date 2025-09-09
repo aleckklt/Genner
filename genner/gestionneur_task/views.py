@@ -92,13 +92,14 @@ def modifier_tache(request, tache_id):
             if cleaned_date and cleaned_heure:
                 dt_obj = datetime.combine(cleaned_date, cleaned_heure)
                 if dt_obj < now:
-                    return render(request, 'task_update.html', {'form': form, 'tache': tache, 'error': "Date/heure dans le passé."})
+                    return render(request, 'task_list.html', {'form': form, 'tache': tache, 'error': "Date/heure dans le passé."})
             elif cleaned_date:
                 if cleaned_date < now.date():
-                    return render(request, 'task_update.html', {'form': form, 'tache': tache, 'error': "Date dans le passé."})
+                    return render(request, 'task_list.html', {'form': form, 'tache': tache, 'error': "Date dans le passé."})
             elif cleaned_heure:
-                return render(request, 'task_update.html', {'form': form, 'tache': tache, 'error': "Veuillez spécifier une date avec l'heure."})
+                return render(request, 'task_list.html', {'form': form, 'tache': tache, 'error': "Veuillez spécifier une date avec l'heure."})
             form.save()
             return redirect('task_list')
     else:
         form = TaskForm(instance=tache)
+    return render(request, 'task_list.html')
