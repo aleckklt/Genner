@@ -1,10 +1,9 @@
-import json
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Tasks
-from django.contrib.auth.decorators import login_required
-from .forms import TaskForm
-import requests
 import os
+import requests
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Tasks
+from .forms import TaskForm
 
 def get_exchange_rates():
     api_key = os.getenv('API_KEY')
@@ -25,7 +24,8 @@ def accueil(request):
 @login_required
 def task_list(request):
     tasks = Tasks.objects.all()
-    return render(request, 'task_list.html', {'tasks': tasks})
+    task_forms = [(task, TaskForm(instance=task)) for task in tasks]
+    return render(request, 'task_list.html', {'task_forms': task_forms})
 
 @login_required
 def convert_device(request):
